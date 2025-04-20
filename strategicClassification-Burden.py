@@ -13,7 +13,7 @@ from sklearn.utils import shuffle
 import math
 import os
 from datetime import datetime
-from gain_and_cost_functions import score, f, g, f_derivative
+from utils.gain_and_cost_functions import score, f, g, f_derivative
 
 torch.set_default_dtype(torch.float64)
 torch.manual_seed(0)
