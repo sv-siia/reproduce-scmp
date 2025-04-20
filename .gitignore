@@ -174,4 +174,5 @@ cython_debug/
 .pypirc
 
 .DS_Store
-models/
+.vscode/
+/models/
