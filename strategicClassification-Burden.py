@@ -1,4 +1,3 @@
-# %matplotlib notebook
 import cvxpy as cp
 import torch
 import numpy as np
@@ -13,7 +12,7 @@ from sklearn.utils import shuffle
 import math
 import os
 from datetime import datetime
-from utils.gain_and_cost_func import score, f, g, f_derivative
+from src.strategic_classification.utils.gain_and_cost_func import score, f, g, f_derivative
 
 torch.set_default_dtype(torch.float64)
 torch.manual_seed(0)

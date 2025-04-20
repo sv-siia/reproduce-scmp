@@ -9,7 +9,7 @@ from torch.utils.data import TensorDataset, DataLoader
 from sklearn.datasets import make_classification
 import math
 import os
-from utils.gain_and_cost_func import score, f, g, f_derivative
+from src.strategic_classification.utils.gain_and_cost_func import score, f, g, f_derivative
 
 torch.set_default_dtype(torch.float64)
 torch.manual_seed(0)

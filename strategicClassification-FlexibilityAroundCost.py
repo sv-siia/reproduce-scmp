@@ -1,27 +1,14 @@
-# %matplotlib notebook
 import cvxpy as cp
-import dccp
 import torch
 import numpy as np
 from cvxpylayers.torch import CvxpyLayer
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from sklearn import svm
 from sklearn.metrics import zero_one_loss, confusion_matrix
-from scipy.io import arff
 import pandas as pd
 import time
-import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
-from sklearn.datasets import make_classification
-from sklearn.preprocessing import StandardScaler, RobustScaler
-from sklearn.utils import shuffle
-import matplotlib.patches as mpatches
-import json
-import random
 import math
-import os, psutil
-from datetime import datetime
+import os
+from src.strategic_classification.utils.gain_and_cost_func import score, f, g, f_derivative
 
 torch.set_default_dtype(torch.float64)
 torch.manual_seed(0)
@@ -35,7 +22,7 @@ EPSILON = 0.05
 X_LOWER_BOUND = -10
 X_UPPER_BOUND = 10
 
-# # Utils
+# Utils
 
 def split_data(X, Y, percentage):
     num_val = int(len(X)*percentage)
@@ -60,7 +47,7 @@ def calc_accuracy(Y, Ypred):
     acc = len(temp[temp == 0])*1./num
     return acc
 
-# # Dataset
+# Dataset
 
 def gen_custom_normal_data(N, pos_mean, pos_std, neg_mean, neg_std):
     torch.manual_seed(0)
@@ -76,7 +63,7 @@ def gen_custom_normal_data(N, pos_mean, pos_std, neg_mean, neg_std):
     X, Y = shuffle(X, Y)
     return X, Y
 
-# # CCP classes
+# CCP classes
 
 class CCP:
     def __init__(self, x_dim, funcs):
@@ -157,29 +144,16 @@ class DELTA():
         Rv = torch.reshape(Rv, (Rv.size()[0], 1))
         return self.layer(X, w, b, v, Rv, F_DER)[0]
 
-# # Gain & Cost functions
-
-def score(x, w, b):
-    return x@w + b
-
-def f(x, w, b, slope):
-    return 0.5*cp.norm(cp.hstack([1, (slope*score(x, w, b) + 1)]), 2)
-
-def g(x, w, b, slope):
-    return 0.5*cp.norm(cp.hstack([1, (slope*score(x, w, b) - 1)]), 2)
-
+# Gain & Cost functions
 def c(x, r, v):
     return COST*(EPSILON*cp.sum_squares(x-r) + (1-EPSILON)*cp.pos((x-r)@v)) # (1-EPSILON)*cp.sum(cp.pos(cp.multiply((x-r), v))))
 
 def c_dpp_form(x, r, v, rv):
     return COST*(EPSILON*cp.sum_squares(x-r) + (1-EPSILON)*cp.pos(x@v-rv)) # (1-EPSILON)*cp.sum(cp.pos(cp.multiply(x, v)-rv)))
 
-def f_derivative(x, w, b, slope):
-    return 0.5*cp.multiply(slope*((slope*score(x, w, b) + 1)/cp.sqrt((slope*score(x, w, b) + 1)**2 + 1)), w)
-
 funcs = {"f": f, "g": g, "f_derivative": f_derivative, "c": c, "c_dpp_form": c_dpp_form, "score": score}
 
-# # Model
+# Model
 
 class MyStrategicModel(torch.nn.Module):
     def __init__(self, x_dim, funcs, train_slope, eval_slope, v_orig, strategic=False, flexible=False, lamb=0):
@@ -337,7 +311,7 @@ class MyStrategicModel(torch.nn.Module):
         print("training time: {} seconds".format(time.time()-total_time)) 
         return train_errors, val_errors, train_losses, val_losses
 
-# # Data generation
+# Data generation
 
 path = "./models/flexibility"
 
@@ -350,7 +324,7 @@ Xval, Yval, Xtest, Ytest = split_data(Xval, Yval, 0.5)
 
 print("percent of positive samples: {}%".format(100 * len(Y[Y == 1]) / len(Y)))
 
-# # Train
+# Train
 
 EPOCHS = 6
 BATCH_SIZE = 16

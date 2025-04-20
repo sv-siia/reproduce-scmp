@@ -14,4 +14,3 @@ def g(x, w, b, slope):
 
 def f_derivative(x, w, b, slope):
     return 0.5*cp.multiply(slope*((slope*score(x, w, b) + 1)/cp.sqrt((slope*score(x, w, b) + 1)**2 + 1)), w)
-  

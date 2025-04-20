@@ -1,29 +1,15 @@
-# Imports and setup
 import cvxpy as cp
-import dccp
 import torch
 import numpy as np
 from cvxpylayers.torch import CvxpyLayer
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from sklearn import svm
-from sklearn.metrics import zero_one_loss, confusion_matrix
+from sklearn.metrics import confusion_matrix
 from scipy.io import arff
 import pandas as pd
 import time
-import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
-from sklearn.datasets import make_classification
-from sklearn.preprocessing import StandardScaler, RobustScaler
-from sklearn.linear_model import LogisticRegression
-from sklearn.utils import shuffle
-import matplotlib.patches as mpatches
-import json
-import random
 import math
-import os, psutil
-from datetime import datetime
-
+import os
+from src.strategic_classification.utils.gain_and_cost_func import score, f, g, f_derivative
 torch.set_default_dtype(torch.float64)
 torch.manual_seed(0)
 np.random.seed(0)
@@ -157,21 +143,8 @@ class DELTA():
         return self.layer(X, w, b, F_DER)[0]
 
 # Gain & Cost functions
-
-def score(x, w, b):
-    return x@w + b
-
-def f(x, w, b, slope):
-    return 0.5*cp.norm(cp.hstack([1, (slope*score(x, w, b) + 1)]), 2)
-
-def g(x, w, b, slope):
-    return 0.5*cp.norm(cp.hstack([1, (slope*score(x, w, b) - 1)]), 2)
-
 def c(x, r, v, eps):
     return (eps*cp.sum_squares(x-r) + (1-eps)*cp.pos((x-r)@v))
-
-def f_derivative(x, w, b, slope):
-    return 0.5*cp.multiply(slope*((slope*score(x, w, b) + 1)/cp.sqrt((slope*score(x, w, b) + 1)**2 + 1)), w)
 
 # Model
 

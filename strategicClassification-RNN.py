@@ -1,30 +1,14 @@
-# %matplotlib notebook
 import cvxpy as cp
-import dccp
 import torch
 import numpy as np
 from cvxpylayers.torch import CvxpyLayer
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from sklearn import svm
-from sklearn.metrics import zero_one_loss, confusion_matrix
-from scipy.io import arff
+from sklearn.metrics import confusion_matrix
 import pandas as pd
 import time
-import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
 from sklearn.model_selection import train_test_split
-from sklearn.datasets import make_classification
-from sklearn.preprocessing import StandardScaler, RobustScaler
-from sklearn.linear_model import LogisticRegression
-from sklearn.utils import shuffle
-import matplotlib.patches as mpatches
-import json
-import random
 import math
-import os, psutil
-from datetime import datetime
-
+import os
 torch.set_default_dtype(torch.float64)
 torch.manual_seed(0)
 np.random.seed(0)
@@ -35,7 +19,7 @@ EVAL_SLOPE = 5
 X_LOWER_BOUND = -10
 X_UPPER_BOUND = 10
 
-# # Utils
+# Utils
 
 def split_data(X, Y, percentage):
     num_val = int(len(X)*percentage)
@@ -62,7 +46,7 @@ def calc_accuracy(Y, Ypred):
     acc = len(temp[temp == 0])*1./num
     return acc
 
-# # Dataset
+# Dataset
 
 def load_financial_distress_data(seq_len=14):
     assert(1 <= seq_len <= 14)
@@ -97,7 +81,7 @@ def load_financial_distress_data(seq_len=14):
     Y = torch.tensor(tmp[1])
     return X, Y
 
-# # CCP classes
+# CCP classes
 
 class CCP:
     def __init__(self, x_dim, h_dim, funcs):
@@ -187,7 +171,7 @@ class DELTA():
         w_b_hy = w_b_hy.reshape(1)
         return self.layer(X, h__w_hh_hy, w_xh_hy, w_b_hy, F_DER)[0]
 
-# # Gain & Cost functions
+# Gain & Cost functions
 
 def score(x, h, w_hy, w_hh, w_xh, b):
     return (h@w_hh.T + x@w_xh.T + b)@w_hy.T
@@ -214,7 +198,7 @@ def f_derivative(x, h, w_hy, w_hh, w_xh, b, slope):
 funcs = {"f": f, "g": g, "f_derivative": f_derivative, "c": c, "score": score,
          "score_dpp_form": score_dpp_form, "g_dpp_form": g_dpp_form}
 
-# # Model
+# Model
 
 class MyRNN(torch.nn.Module):
     def __init__(self, x_dim, h_dim, funcs, train_slope, eval_slope, strategic=False, extra=False):
@@ -384,7 +368,7 @@ class MyRNN(torch.nn.Module):
         print("training time: {} seconds".format(time.time()-total_time)) 
         return train_errors, val_errors, train_losses, val_losses
 
-# # Train
+# Train
 
 PATH = "./models/rnn"
 
