@@ -26,6 +26,25 @@ Our project focuses on reproducing and evaluating the methodologies presented in
 implementation, NumPy and Pandas for data manipulation, Matplotlib or Seaborn for visualization.
 - **Version Control:** Git and GitHub for collaborative development and version tracking.
 
+## How to install and run?
+
+At first install the `uv` python package manager, see more [here](https://docs.astral.sh/uv/getting-started/installation/#__tabbed_1_2).
+
+Clone the code repository as follows
+
+```bash
+git clone git@github.com:sv-siia/reproduce-scmp.git
+
+# now change directory to the repository
+cd reproduce-scmp
+```
+
+Install Python dependencies using `uv` package manager
+
+```bash
+uv sync
+```
+
 ## Team Member Responsibilities
 
 - **Porimol Chandro:** Lead the implementation of the strategic classification framework and oversee the integration of various components.
