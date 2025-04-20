@@ -20,17 +20,27 @@ def evaluate_model(y_true, y_pred, y_scores=None):
     - Dictionary with metrics
     """
     metrics = {
-        'Accuracy': accuracy_score(y_true, y_pred),
-        'Precision': precision_score(y_true, y_pred, average='binary'),
-        'Recall': recall_score(y_true, y_pred, average='binary'),
-        'F1 Score': f1_score(y_true, y_pred, average='binary'),
-        'Confusion Matrix': confusion_matrix(y_true, y_pred)
+        'accuracy': accuracy_score(y_true, y_pred),
+        'precision': precision_score(y_true, y_pred, average='binary'),
+        'recall': recall_score(y_true, y_pred, average='binary'),
+        'f1_score': f1_score(y_true, y_pred, average='binary'),
+        'confusion_matrix': confusion_matrix(y_true, y_pred)
     }
 
     if y_scores is not None:
         try:
-            metrics['ROC AUC'] = roc_auc_score(y_true, y_scores)
+            metrics['roc_aucC'] = roc_auc_score(y_true, y_scores)
         except ValueError:
-            metrics['ROC AUC'] = 'Undefined (check y_scores or y_true)'
+            metrics['roc_auc'] = 'Undefined (check y_scores or y_true)'
 
     return metrics
+
+
+if __name__ == "__main__":
+    # test usage
+    y_true = [0, 1, 1, 0, 1, 0, 1, 0, 1, 0]
+    y_pred = [0, 1, 1, 0, 0, 0, 1, 1, 1, 0]
+    y_scores = [0.1, 0.9, 0.8, 0.4, 0.3, 0.2, 0.85, 0.6, 0.95, 0.05]
+
+    response = evaluate_model(y_true, y_pred, y_scores)
+    print(response)
