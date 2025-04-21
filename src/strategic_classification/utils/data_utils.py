@@ -48,12 +48,12 @@ def load_credit_default_data():
     return torch.from_numpy(X), torch.from_numpy(Y)
 
 
-def load_financial_distress_data(seq_len=14):
+def load_financial_distress_data(dataset_abs_path, seq_len=14):
     assert(1 <= seq_len <= 14)
     torch.manual_seed(0)
     np.random.seed(0)
 
-    data = pd.read_csv("./dataset/Financial_Distress.csv")
+    data = pd.read_csv(dataset_abs_path)
 
     data = data[data.columns.drop(list(data.filter(regex='x80')))] # Since it is a categorical feature with 37 features.
     x_dim = len(data.columns) - 3

@@ -5,24 +5,17 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import TensorDataset, DataLoader
-from src.strategic_classification.models.ccp import CCP
-from src.strategic_classification.models.delta import DELTA
-from src.strategic_classification.utils.gain_and_cost_func import *
+from sklearn.model_selection import train_test_split
+from strategic_classification.models.rnn.rnnccp import RNNCCP
+from strategic_classification.models.rnn.rnndelta import DeltaRNN
+from strategic_classification.config.constants import XDIM, TRAIN_SLOPE, EVAL_SLOPE
+from strategic_classification.utils.data_utils import load_financial_distress_data
 torch.set_default_dtype(torch.float64)
 
-funcs = {
-    "f": f,
-    "g": g,
-    "f_derivative": f_derivative, 
-    "c": c,
-    "score": score,
-    "score_dpp_form": score_dpp_form,
-    "g_dpp_form": g_dpp_form
-}
 
 class MyRNN(torch.nn.Module):
     """A simple RNN model with strategic classification capabilities."""
-    def __init__(self, x_dim, h_dim, funcs, train_slope, eval_slope, strategic=False, extra=False):
+    def __init__(self, x_dim, h_dim, train_slope, eval_slope, strategic=False, extra=False):
         torch.manual_seed(0)
         np.random.seed(0)
         
@@ -37,15 +30,15 @@ class MyRNN(torch.nn.Module):
         self.sigmoid = torch.nn.Sigmoid()
         self.strategic = strategic
         self.extra = extra
-        self.ccp = CCP(x_dim, h_dim, funcs)
-        self.delta = DELTA(x_dim, h_dim, funcs)
+        self.ccp = RNNCCP(x_dim, h_dim)
+        self.delta = DeltaRNN(x_dim)
 
     def forward(self, X, evaluation=False):
         batch_size, seq_len, _ = X.size()  # B, 14, 82
         # assert(seq_len == 14)
         X = X.transpose(1,0)
         
-        H = torch.zeros((batch_size, h_dim), dtype=torch.float64, requires_grad=False)
+        H = torch.zeros((batch_size, self.h_dim), dtype=torch.float64, requires_grad=False)
         for x in X[:-1]:
             H = self.sigmoid(H@self.W_hh.T + x@self.W_xh.T + self.b)
         
@@ -72,7 +65,7 @@ class MyRNN(torch.nn.Module):
         batch_size, seq_len, _ = X.size()
         X = X.transpose(1,0)
         
-        H = torch.zeros((batch_size, h_dim), dtype=torch.float64, requires_grad=False)
+        H = torch.zeros((batch_size, self.h_dim), dtype=torch.float64, requires_grad=False)
         for x in X[:-1]:
             H = self.sigmoid(H@self.W_hh.T + x@self.W_xh.T + self.b)
         
@@ -179,7 +172,7 @@ class MyRNN(torch.nn.Module):
                     else:
                         consecutive_no_improvement += 1
                         if consecutive_no_improvement >= 10:
-                                break
+                            break
                 except:
                     print("failed")
                     
@@ -189,3 +182,71 @@ class MyRNN(torch.nn.Module):
 
         print("training time: {} seconds".format(time.time()-total_time)) 
         return train_errors, val_errors, train_losses, val_losses
+
+
+def train_rnn(dataset_path: str, epochs: int = 5, batch_size: int = 16, model_checkpoint_path: str = "models/rnn"):
+    """
+    Train an RNN model with the given parameters.
+
+    Args:
+        dataset_path (str): Path to the dataset file.
+        output_path (str): Directory to save the trained models and results.
+        epochs (int): Number of training epochs.
+        batch_size (int): Batch size for training.
+    """
+    torch.manual_seed(0)
+    np.random.seed(0)
+
+    dataset_abs_path = dataset_path + "/financial_distress.csv"
+    x_dim, h_dim = XDIM, 10
+
+    for seq_len in range(1, 15):
+        path = model_checkpoint_path + "/" + str(seq_len)
+
+        X, Y = load_financial_distress_data(dataset_abs_path, seq_len)
+        X /= math.sqrt(XDIM)
+        X, Xval, Y, Yval = train_test_split(X, Y, test_size=0.4, random_state=10)
+        Xval, Xtest, Yval, Ytest = train_test_split(Xval, Yval, test_size=0.5, random_state=10)
+        
+        if not os.path.exists(path):
+            os.makedirs(path)
+        pd.DataFrame(torch.flatten(X).numpy()).to_csv(path + '/X.csv')
+        pd.DataFrame(torch.flatten(Y).numpy()).to_csv(path + '/Y.csv')
+        pd.DataFrame(torch.flatten(Xval).numpy()).to_csv(path + '/Xval.csv')
+        pd.DataFrame(torch.flatten(Yval).numpy()).to_csv(path + '/Yval.csv')
+        pd.DataFrame(torch.flatten(Xtest).numpy()).to_csv(path + '/Xtest.csv')
+        pd.DataFrame(torch.flatten(Ytest).numpy()).to_csv(path + '/Ytest.csv')
+
+        # non-strategic classification
+        print("---------- training non-strategically----------")
+        non_strategic_model = MyRNN(x_dim, h_dim, TRAIN_SLOPE, EVAL_SLOPE, strategic=False, extra=False)
+
+        non_strategic_model.fit(path, X, Y, Xval, Yval,
+                                    opt=torch.optim.Adam, opt_kwargs={"lr": (5e-3)},
+                                    batch_size=batch_size, epochs=epochs+10, verbose=False,
+                                    comment="non_strategic")
+        
+        # strategic classification
+        print("---------- training strategically----------")
+        strategic_model = MyRNN(x_dim, h_dim, TRAIN_SLOPE, EVAL_SLOPE, strategic=True, extra=False)
+
+        strategic_model.fit(path, X, Y, Xval, Yval,
+                                    opt=torch.optim.Adam, opt_kwargs={"lr": (5e-2)},
+                                    batch_size=batch_size, epochs=epochs, verbose=False,
+                                    comment="strategic")
+
+    non_strategic_model = MyRNN(x_dim, h_dim, TRAIN_SLOPE, EVAL_SLOPE, strategic=False, extra=False)
+    non_strategic_model.load_model(path + "/non_strategic/model.pt")
+
+    strategic_model = MyRNN(x_dim, h_dim, TRAIN_SLOPE, EVAL_SLOPE, strategic=True, extra=False)
+    strategic_model.load_model(path + "/strategic/model.pt")
+
+    accuracies = np.zeros(3)
+    accuracies[0] = non_strategic_model.evaluate(Xtest, Ytest)
+
+    accuracies[1] = strategic_model.evaluate(Xtest, Ytest)
+
+    Xtest_opt = non_strategic_model.optimize_X(Xtest)
+    accuracies[2] = non_strategic_model.evaluate(Xtest_opt, Ytest)
+
+    pd.DataFrame(accuracies).to_csv(path + '/results.csv')

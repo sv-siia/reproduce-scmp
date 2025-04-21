@@ -1,15 +1,12 @@
 import cvxpy as cp
 import torch
 import numpy as np
-from src.strategic_classification.config.constants import X_LOWER_BOUND, X_UPPER_BOUND
+from strategic_classification.config.constants import X_LOWER_BOUND, X_UPPER_BOUND
 
 
-class CCP:
+class RNNCCP:
     """Class for solving the convex-concave problem using CVXPY."""
-    def __init__(self, x_dim, h_dim, funcs):
-        self.f_derivative = funcs["f_derivative"]
-        self.g = funcs["g"]
-        self.c = funcs["c"]
+    def __init__(self, x_dim, h_dim):
         
         self.x = cp.Variable(x_dim)
         self.xt = cp.Parameter(x_dim)
@@ -25,6 +22,25 @@ class CCP:
         constraints = [self.x >= X_LOWER_BOUND,
                        self.x <= X_UPPER_BOUND]
         self.prob = cp.Problem(cp.Maximize(target), constraints)
+    
+    def score(self, x, h, w_hy, w_hh, w_xh, b):
+        return (h@w_hh.T + x@w_xh.T + b)@w_hy.T
+    
+    def score_dpp_form(self, x, h__w_hh_hy, w_xh_hy, w_b_hy):
+        return h__w_hh_hy + x@w_xh_hy.T + w_b_hy
+
+    def g(self, x, h, w_hy, w_hh, w_xh, b, slope):
+        return 0.5*cp.norm(cp.hstack([1, (slope*self.score(x, h, w_hy, w_hh, w_xh, b) - 1)]), 2)
+
+    def g_dpp_form(self, x, h__w_hh_hy, w_xh_hy, w_b_hy, slope):
+        return 0.5*cp.norm(cp.hstack([1, (slope*self.score_dpp_form(x, h__w_hh_hy, w_xh_hy, w_b_hy) - 1)]), 2)
+
+    def c(self, x, r):
+        return cp.sum_squares(x-r)
+
+    def f_derivative(self, x, h, w_hy, w_hh, w_xh, b, slope):
+        return 0.5*slope*((slope*self.score(x, h, w_hy, w_hh, w_xh, b) + 1)
+                            /cp.sqrt((slope*self.score(x, h, w_hy, w_hh, w_xh, b) + 1)**2 + 1))*(w_hy@w_xh)
         
     def ccp(self, r, h):
         """
