@@ -23,6 +23,17 @@ X_UPPER_BOUND = 10
 SEED = 0
 
 # # Utils
+"""
+    Randomly shuffles the dataset by concatenating features and labels,
+    shuffling the combined tensor, and then separating them again.
+
+    Args:
+        X (torch.Tensor): Feature matrix of shape (n_samples, n_features).
+        Y (torch.Tensor): Label vector of shape (n_samples,).
+
+    Returns:
+        Tuple[torch.Tensor, torch.Tensor]: Shuffled (X, Y) tensors.
+    """
 def shuffle(X, Y):
     data = torch.cat((Y, X), 1)
     data = data[torch.randperm(data.size()[0])]
@@ -31,7 +42,17 @@ def shuffle(X, Y):
     return X, Y
 
 # # Dataset
+"""
+    Load and preprocess the spam dataset for binary classification.
 
+    This function reads a spam dataset from an ARFF file, selects the most discriminative features,
+    encodes the target labels, normalizes the feature matrix, and returns it as PyTorch tensors.
+
+    Returns:
+        Tuple[torch.Tensor, torch.Tensor]: A tuple containing:
+            - X (torch.Tensor): Normalized feature matrix.
+            - Y (torch.Tensor): Target labels with values {-1, 1}, where -1 indicates 'spam' and 1 indicates 'notspam'.
+    """
 def load_spam_data():
     torch.manual_seed(0)
     np.random.seed(0)
