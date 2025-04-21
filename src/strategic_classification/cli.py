@@ -19,6 +19,15 @@ def train(model: str, dataset_path: str, epochs: int = 5, batch_size: int = 16, 
     elif model == "vanilla":
         typer.echo("Training Vanilla model...")
         # TODO: Add Vanilla model training logic here
+    elif model == "recourse":
+        typer.echo("Training Recourse model...")
+        # TODO: Add Recourse model training logic here
+    elif model == "maniforld":
+        typer.echo("Training Maniforld model...")
+        # TODO: Add Maniforld model training logic here
+    elif model == "rac":
+        typer.echo("Training RobustnessAroundCost model...")
+        # TODO: Add RobustnessAroundCost model training logic here
     else:
         typer.echo(f"Unknown model: {model}")
 
