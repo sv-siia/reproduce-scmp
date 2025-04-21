@@ -1,30 +1,15 @@
-# %matplotlib notebook
 import cvxpy as cp
-import dccp
 import torch
 import numpy as np
 from cvxpylayers.torch import CvxpyLayer
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from sklearn import svm
-from sklearn.metrics import zero_one_loss, confusion_matrix
-from scipy.io import arff
+from sklearn.metrics import confusion_matrix
 import pandas as pd
 import time
-import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
 from sklearn.model_selection import train_test_split
-from sklearn.datasets import make_classification
-from sklearn.preprocessing import StandardScaler, RobustScaler
-from sklearn.linear_model import LogisticRegression
-from sklearn.utils import shuffle
-import matplotlib.patches as mpatches
-import json
-import random
 import math
-import os, psutil
-from datetime import datetime
-
+import os
+from src.strategic_classification.utils.data_utils import load_financial_distress_data
 torch.set_default_dtype(torch.float64)
 torch.manual_seed(0)
 np.random.seed(0)
@@ -35,12 +20,7 @@ EVAL_SLOPE = 5
 X_LOWER_BOUND = -10
 X_UPPER_BOUND = 10
 
-# # Utils
-
-def split_data(X, Y, percentage):
-    num_val = int(len(X)*percentage)
-    return X[num_val:], Y[num_val:], X[:num_val], Y[:num_val]
-
+# Utils
 def shuffle(X, Y):
     torch.manual_seed(0)
     np.random.seed(0)
@@ -50,54 +30,8 @@ def shuffle(X, Y):
     Y = data[:, 0]
     return X, Y
 
-def conf_mat(Y1, Y2):
-    num_of_samples = len(Y1)
-    mat = confusion_matrix(Y1, Y2, labels=[-1, 1])*100/num_of_samples
-    acc = np.trace(mat)
-    return mat, acc
 
-def calc_accuracy(Y, Ypred):
-    num = len(Y)
-    temp = Y - Ypred
-    acc = len(temp[temp == 0])*1./num
-    return acc
-
-# # Dataset
-
-def load_financial_distress_data(seq_len=14):
-    assert(1 <= seq_len <= 14)
-    torch.manual_seed(0)
-    np.random.seed(0)
-
-    data = pd.read_csv("./financial_distress_data/Financial Distress.csv")
-
-    data = data[data.columns.drop(list(data.filter(regex='x80')))] # Since it is a categorical feature with 37 features.
-    x_dim = len(data.columns) - 3
-    max_seq_len = data['Time'].max()
-    
-    X = []
-    Y = []
-    data_grouped = data.groupby(['Company']).last()
-    normalized_data = (data-data.mean())/data.std()
-    for company_num in data_grouped.index:
-        x = torch.tensor(normalized_data[data['Company'] == company_num].values)
-        x = x[:,3:]
-        x_seq_len = x.size()[0]
-        if x_seq_len < max_seq_len:
-            pad = torch.zeros((max_seq_len-x_seq_len, x_dim))
-            x = torch.cat((pad, x), 0)
-        y = data_grouped.iloc[company_num-1, 1]
-        y = -1 if y < -0.5 else 1
-        X.append(x[14-seq_len:, :])
-        Y.append(y)
-
-    XY = list(zip(X, Y))
-    tmp = [list(t) for t in zip(*XY)]
-    X = torch.stack(tmp[0])
-    Y = torch.tensor(tmp[1])
-    return X, Y
-
-# # CCP classes
+# CCP classes
 
 class CCP:
     def __init__(self, x_dim, h_dim, funcs):
@@ -187,7 +121,7 @@ class DELTA():
         w_b_hy = w_b_hy.reshape(1)
         return self.layer(X, h__w_hh_hy, w_xh_hy, w_b_hy, F_DER)[0]
 
-# # Gain & Cost functions
+# Gain & Cost functions
 
 def score(x, h, w_hy, w_hh, w_xh, b):
     return (h@w_hh.T + x@w_xh.T + b)@w_hy.T
@@ -214,7 +148,7 @@ def f_derivative(x, h, w_hy, w_hh, w_xh, b, slope):
 funcs = {"f": f, "g": g, "f_derivative": f_derivative, "c": c, "score": score,
          "score_dpp_form": score_dpp_form, "g_dpp_form": g_dpp_form}
 
-# # Model
+# Model
 
 class MyRNN(torch.nn.Module):
     def __init__(self, x_dim, h_dim, funcs, train_slope, eval_slope, strategic=False, extra=False):
@@ -384,7 +318,7 @@ class MyRNN(torch.nn.Module):
         print("training time: {} seconds".format(time.time()-total_time)) 
         return train_errors, val_errors, train_losses, val_losses
 
-# # Train
+# Train
 
 PATH = "./models/rnn"
 

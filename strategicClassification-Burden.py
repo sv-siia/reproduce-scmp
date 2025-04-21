@@ -1,28 +1,19 @@
-# %matplotlib notebook
 import cvxpy as cp
-import dccp
 import torch
 import numpy as np
 from cvxpylayers.torch import CvxpyLayer
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from sklearn import svm
-from sklearn.metrics import zero_one_loss, confusion_matrix
-from scipy.io import arff
+from sklearn.metrics import confusion_matrix
 import pandas as pd
 import time
-import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
 from sklearn.preprocessing import StandardScaler
 from sklearn.datasets import make_classification
 from sklearn.utils import shuffle
-import matplotlib.patches as mpatches
-import json
-import random
 import math
-import os, psutil
+import os
 from datetime import datetime
-
+from src.strategic_classification.utils.gain_and_cost_func import score, f, g, f_derivative
+from src.strategic_classification.utils.data_utils import split_data, load_credit_default_data, split_data
 torch.set_default_dtype(torch.float64)
 torch.manual_seed(0)
 np.random.seed(0)
@@ -33,57 +24,6 @@ TRAIN_SLOPE = 2
 EVAL_SLOPE = 5
 X_LOWER_BOUND = -10
 X_UPPER_BOUND = 10
-
-# # Utils
-
-def split_data(X, Y, percentage):
-    num_val = int(len(X)*percentage)
-    return X[num_val:], Y[num_val:], X[:num_val], Y[:num_val]
-
-def shuffle(X, Y):
-    data = torch.cat((X, Y), 1)
-    data = data[torch.randperm(data.size()[0])]
-    X = data[:, :2]
-    Y = data[:, 2]
-    return X, Y
-
-def conf_mat(Y1, Y2):
-    num_of_samples = len(Y1)
-    mat = confusion_matrix(Y1, Y2, labels=[-1, 1])*100/num_of_samples
-    acc = np.trace(mat)
-    return mat, acc
-
-def calc_accuracy(Y, Ypred):
-    num = len(Y)
-    temp = Y - Ypred
-    acc = len(temp[temp == 0])*1./num
-    return acc
-
-# # Dataset
-
-def load_credit_default_data():
-    torch.manual_seed(0)
-    np.random.seed(0)
-    url = 'https://raw.githubusercontent.com/ustunb/actionable-recourse/master/examples/paper/data/credit_processed.csv'
-    df = pd.read_csv(url)
-    df["NoDefaultNextMonth"].replace({0: -1}, inplace=True)
-    df = df.sample(frac=1).reset_index(drop=True)
-
-    df = df.drop(['Married', 'Single', 'Age_lt_25', 'Age_in_25_to_40', 'Age_in_40_to_59', 'Age_geq_60'], axis = 1)
-
-    scaler = StandardScaler()
-    df.loc[:, df.columns != "NoDefaultNextMonth"] = scaler.fit_transform(df.drop("NoDefaultNextMonth", axis=1))
-
-    fraud_df = df.loc[df["NoDefaultNextMonth"] == -1]
-    non_fraud_df = df.loc[df["NoDefaultNextMonth"] == 1][:6636]
-
-    normal_distributed_df = pd.concat([fraud_df, non_fraud_df])
-
-    # Shuffle dataframe rows
-    df = normal_distributed_df.sample(frac=1).reset_index(drop=True)
-
-    Y, X = df.iloc[:, 0].values, df.iloc[:, 1:].values
-    return torch.from_numpy(X), torch.from_numpy(Y)
 
 # # CCP classes
 
@@ -192,21 +132,8 @@ class BURDEN():
         return torch.mean(torch.sum((Xpos-Xmin)**2, dim=1))
 
 # # Gain & Cost functions
-
-def score(x, w, b):
-    return x@w + b
-
-def f(x, w, b, slope):
-    return 0.5*cp.norm(cp.hstack([1, (slope*score(x, w, b) + 1)]), 2)
-
-def g(x, w, b, slope):
-    return 0.5*cp.norm(cp.hstack([1, (slope*score(x, w, b) - 1)]), 2)
-
 def c(x, r):
     return COST*cp.sum_squares(x-r)
-
-def f_derivative(x, w, b, slope):
-    return 0.5*cp.multiply(slope*((slope*score(x, w, b) + 1)/cp.sqrt((slope*score(x, w, b) + 1)**2 + 1)), w)
 
 funcs = {"f": f, "g": g, "f_derivative": f_derivative, "c": c, "score": score}
 
