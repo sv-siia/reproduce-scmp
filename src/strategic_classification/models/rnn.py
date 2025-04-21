@@ -7,8 +7,18 @@ import torch
 from torch.utils.data import TensorDataset, DataLoader
 from src.strategic_classification.models.ccp import CCP
 from src.strategic_classification.models.delta import DELTA
+from src.strategic_classification.utils.gain_and_cost_func import *
 torch.set_default_dtype(torch.float64)
 
+funcs = {
+    "f": f,
+    "g": g,
+    "f_derivative": f_derivative, 
+    "c": c,
+    "score": score,
+    "score_dpp_form": score_dpp_form,
+    "g_dpp_form": g_dpp_form
+}
 
 class MyRNN(torch.nn.Module):
     """A simple RNN model with strategic classification capabilities."""
