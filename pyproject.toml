@@ -1,7 +1,17 @@
 [project]
 name = "reproduce-scmp"
 version = "0.1.0"
-description = "Add your description here"
+description = """
+Our project focuses on reproduce, analyzing, evaluating and develop a Python pacakge based on the methodologies presented in the paper "Strategic Classification Made Practical" by Sagi Levanon and Nir Rosenfeld.
+This study addresses the challenges posed by strategic behavior in classification tasks, where individuals may alter their features to receive favorable outcomes.
+The authors propose a learning framework that directly minimizes the "strategic" empirical risk by differentiating through the strategic responses of users.
+"""
+authors = [
+    {name = "Porimol Chandro", email = "p.chandro@student.uw.edu.pl"},
+    {name = "Shokoufeh Naseri", email = "s.naseri@student.uw.edu.pl"},
+    {name = "Anastasiia Sviridova", email = "a.sviridova@student.uw.edu.pl"},
+    {name = "Samidullo Abdullaev", email = "s.abdullaev@student.uw.edu.pl"}
+]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
