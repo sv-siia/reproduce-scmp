@@ -1,9 +1,10 @@
 import typer
+from strategic_classification.models.rnn import train_rnn
 
 app = typer.Typer(help="CLI for the reproduce-scmp project.")
 
 @app.command()
-def train(model: str):
+def train(model: str, dataset_path: str, epochs: int = 5, batch_size: int = 16, model_checkpoint_path: str = "models/rnn"):
     """
     Train a specified model.
 
@@ -12,7 +13,9 @@ def train(model: str):
     """
     if model == "rnn":
         typer.echo("Training RNN model...")
-        # TODO: Add RNN training logic here
+        # python src/strategic_classification/cli.py train rnn dataset --epochs 1 --batch-size 32 --model-checkpoint-path models/rnn
+        # scmp train rnn dataset --epochs 2 --batch-size 16 --model-checkpoint-path models/rnn
+        train_rnn(dataset_path, epochs, batch_size, model_checkpoint_path)
     elif model == "vanilla":
         typer.echo("Training Vanilla model...")
         # TODO: Add Vanilla model training logic here
