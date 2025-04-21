@@ -1,6 +1,6 @@
 import typer
 from strategic_classification.models.rnn import train_rnn
-
+from strategic_classification.models.recourse import train_recourse
 app = typer.Typer(help="CLI for the reproduce-scmp project.")
 
 @app.command()
@@ -21,7 +21,9 @@ def train(model: str, dataset_path: str, epochs: int = 5, batch_size: int = 16, 
         # TODO: Add Vanilla model training logic here
     elif model == "recourse":
         typer.echo("Training Recourse model...")
-        # TODO: Add Recourse model training logic here
+        # python src/strategic_classification/cli.py train recourse dataset --epochs 1 --batch-size 32 --model-checkpoint-path models/recourse
+        # scmp train recourse dataset --epochs 2 --batch-size 16 --model-checkpoint-path models/recourse
+        train_rnn(dataset_path, epochs, batch_size, model_checkpoint_path)
     elif model == "maniforld":
         typer.echo("Training Maniforld model...")
         # TODO: Add Maniforld model training logic here
