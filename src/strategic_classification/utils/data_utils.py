@@ -85,7 +85,7 @@ def load_financial_distress_data(seq_len=14):
 def load_spam_dataset():
     torch.manual_seed(0)
     np.random.seed(0)
-    path = r"C:\Users\sagil\Desktop\nir_project\tip_spam_data\IS_journal_tip_spam.arff"
+    path = r"./dataset/IS_journal_tip_spam.arff"
     data, meta = arff.loadarff(path)
     df = pd.DataFrame(data)
     most_disc = ['qTips_plc', 'rating_plc', 'qEmail_tip', 'qContacts_tip', 'qURL_tip', 'qPhone_tip', 'qNumeriChar_tip', 'sentistrength_tip', 'combined_tip', 'qWords_tip', 'followers_followees_gph', 'qunigram_avg_tip', 'qTips_usr', 'indeg_gph', 'qCapitalChar_tip', 'class1']
