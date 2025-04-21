@@ -11,6 +11,7 @@ import math
 import os
 from datetime import datetime
 from src.strategic_classification.utils.gain_and_cost_func import score, f, g, f_derivative
+from src.strategic_classification.utils.data_utils import load_credit_default_data, split_data
 torch.set_default_dtype(torch.float64)
 torch.manual_seed(0)
 np.random.seed(0)
@@ -21,57 +22,6 @@ TRAIN_SLOPE = 1
 EVAL_SLOPE = 5
 X_LOWER_BOUND = -10
 X_UPPER_BOUND = 10
-
-# Utils
-
-def split_data(X, Y, percentage):
-    num_val = int(len(X)*percentage)
-    return X[num_val:], Y[num_val:], X[:num_val], Y[:num_val]
-
-def shuffle(X, Y):
-    data = torch.cat((X, Y), 1)
-    data = data[torch.randperm(data.size()[0])]
-    X = data[:, :2]
-    Y = data[:, 2]
-    return X, Y
-
-def conf_mat(Y1, Y2):
-    num_of_samples = len(Y1)
-    mat = confusion_matrix(Y1, Y2, labels=[-1, 1])*100/num_of_samples
-    acc = np.trace(mat)
-    return mat, acc
-
-def calc_accuracy(Y, Ypred):
-    num = len(Y)
-    temp = Y - Ypred
-    acc = len(temp[temp == 0])*1./num
-    return acc
-
-# Dataset
-
-def load_credit_default_data():
-    torch.manual_seed(0)
-    np.random.seed(0)
-    url = 'https://raw.githubusercontent.com/ustunb/actionable-recourse/master/examples/paper/data/credit_processed.csv'
-    df = pd.read_csv(url)
-    df["NoDefaultNextMonth"].replace({0: -1}, inplace=True)
-    df = df.sample(frac=1).reset_index(drop=True)
-
-    df = df.drop(['Married', 'Single', 'Age_lt_25', 'Age_in_25_to_40', 'Age_in_40_to_59', 'Age_geq_60'], axis = 1)
-
-    scaler = StandardScaler()
-    df.loc[:, df.columns != "NoDefaultNextMonth"] = scaler.fit_transform(df.drop("NoDefaultNextMonth", axis=1))
-
-    fraud_df = df.loc[df["NoDefaultNextMonth"] == -1]
-    non_fraud_df = df.loc[df["NoDefaultNextMonth"] == 1][:6636]
-
-    normal_distributed_df = pd.concat([fraud_df, non_fraud_df])
-
-    # Shuffle dataframe rows
-    df = normal_distributed_df.sample(frac=1).reset_index(drop=True)
-
-    Y, X = df.iloc[:, 0].values, df.iloc[:, 1:].values
-    return torch.from_numpy(X), torch.from_numpy(Y)
 
 # CCP classes
 

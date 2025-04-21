@@ -6,23 +6,28 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import confusion_matrix
 
 def split_data(X, Y, percentage):
-    num_val = int(len(X) * percentage)
+    num_val = int(len(X)*percentage)
     return X[num_val:], Y[num_val:], X[:num_val], Y[:num_val]
 
 def shuffle(X, Y):
-    idx = torch.randperm(X.size(0))
-    return X[idx], Y[idx]
+    torch.manual_seed(0)
+    np.random.seed(0)
+    data = torch.cat((X, Y), 1)
+    data = data[torch.randperm(data.size()[0])]
+    X = data[:, :2]
+    Y = data[:, 2]
+    return X, Y
 
 def conf_mat(Y1, Y2):
     num_of_samples = len(Y1)
-    mat = confusion_matrix(Y1, Y2, labels=[-1, 1]) * 100 / num_of_samples
+    mat = confusion_matrix(Y1, Y2, labels=[-1, 1])*100/num_of_samples
     acc = np.trace(mat)
     return mat, acc
 
 def calc_accuracy(Y, Ypred):
     num = len(Y)
     temp = Y - Ypred
-    acc = len(temp[temp == 0]) * 1. / num
+    acc = len(temp[temp == 0])*1./num
     return acc
 
 def load_credit_default_data():
@@ -41,6 +46,40 @@ def load_credit_default_data():
     df = normal_distributed_df.sample(frac=1).reset_index(drop=True)
     Y, X = df.iloc[:, 0].values, df.iloc[:, 1:].values
     return torch.from_numpy(X), torch.from_numpy(Y)
+
+
+def load_financial_distress_data(seq_len=14):
+    assert(1 <= seq_len <= 14)
+    torch.manual_seed(0)
+    np.random.seed(0)
+
+    data = pd.read_csv("./dataset/Financial_Distress.csv")
+
+    data = data[data.columns.drop(list(data.filter(regex='x80')))] # Since it is a categorical feature with 37 features.
+    x_dim = len(data.columns) - 3
+    max_seq_len = data['Time'].max()
+    
+    X = []
+    Y = []
+    data_grouped = data.groupby(['Company']).last()
+    normalized_data = (data-data.mean())/data.std()
+    for company_num in data_grouped.index:
+        x = torch.tensor(normalized_data[data['Company'] == company_num].values)
+        x = x[:,3:]
+        x_seq_len = x.size()[0]
+        if x_seq_len < max_seq_len:
+            pad = torch.zeros((max_seq_len-x_seq_len, x_dim))
+            x = torch.cat((pad, x), 0)
+        y = data_grouped.iloc[company_num-1, 1]
+        y = -1 if y < -0.5 else 1
+        X.append(x[14-seq_len:, :])
+        Y.append(y)
+
+    XY = list(zip(X, Y))
+    tmp = [list(t) for t in zip(*XY)]
+    X = torch.stack(tmp[0])
+    Y = torch.tensor(tmp[1])
+    return X, Y
 
 
 def load_spam_dataset():

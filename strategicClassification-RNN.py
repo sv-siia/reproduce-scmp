@@ -9,6 +9,7 @@ from torch.utils.data import TensorDataset, DataLoader
 from sklearn.model_selection import train_test_split
 import math
 import os
+from src.strategic_classification.utils.data_utils import load_financial_distress_data
 torch.set_default_dtype(torch.float64)
 torch.manual_seed(0)
 np.random.seed(0)
@@ -20,11 +21,6 @@ X_LOWER_BOUND = -10
 X_UPPER_BOUND = 10
 
 # Utils
-
-def split_data(X, Y, percentage):
-    num_val = int(len(X)*percentage)
-    return X[num_val:], Y[num_val:], X[:num_val], Y[:num_val]
-
 def shuffle(X, Y):
     torch.manual_seed(0)
     np.random.seed(0)
@@ -34,52 +30,6 @@ def shuffle(X, Y):
     Y = data[:, 0]
     return X, Y
 
-def conf_mat(Y1, Y2):
-    num_of_samples = len(Y1)
-    mat = confusion_matrix(Y1, Y2, labels=[-1, 1])*100/num_of_samples
-    acc = np.trace(mat)
-    return mat, acc
-
-def calc_accuracy(Y, Ypred):
-    num = len(Y)
-    temp = Y - Ypred
-    acc = len(temp[temp == 0])*1./num
-    return acc
-
-# Dataset
-
-def load_financial_distress_data(seq_len=14):
-    assert(1 <= seq_len <= 14)
-    torch.manual_seed(0)
-    np.random.seed(0)
-
-    data = pd.read_csv("./financial_distress_data/Financial Distress.csv")
-
-    data = data[data.columns.drop(list(data.filter(regex='x80')))] # Since it is a categorical feature with 37 features.
-    x_dim = len(data.columns) - 3
-    max_seq_len = data['Time'].max()
-    
-    X = []
-    Y = []
-    data_grouped = data.groupby(['Company']).last()
-    normalized_data = (data-data.mean())/data.std()
-    for company_num in data_grouped.index:
-        x = torch.tensor(normalized_data[data['Company'] == company_num].values)
-        x = x[:,3:]
-        x_seq_len = x.size()[0]
-        if x_seq_len < max_seq_len:
-            pad = torch.zeros((max_seq_len-x_seq_len, x_dim))
-            x = torch.cat((pad, x), 0)
-        y = data_grouped.iloc[company_num-1, 1]
-        y = -1 if y < -0.5 else 1
-        X.append(x[14-seq_len:, :])
-        Y.append(y)
-
-    XY = list(zip(X, Y))
-    tmp = [list(t) for t in zip(*XY)]
-    X = torch.stack(tmp[0])
-    Y = torch.tensor(tmp[1])
-    return X, Y
 
 # CCP classes
 

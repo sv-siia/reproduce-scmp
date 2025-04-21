@@ -10,7 +10,7 @@ from sklearn.datasets import make_classification
 import math
 import os
 from src.strategic_classification.utils.gain_and_cost_func import score, f, g, f_derivative
-
+from src.strategic_classification.utils.data_utils import split_data
 torch.set_default_dtype(torch.float64)
 torch.manual_seed(0)
 np.random.seed(0)
@@ -22,31 +22,12 @@ X_UPPER_BOUND = 10
 SEED = 0
 
 # Utils
-
-def split_data(X, Y, percentage):
-    num_val = int(len(X)*percentage)
-    return X[num_val:], Y[num_val:], X[:num_val], Y[:num_val]
-
 def shuffle(X, Y):
-    torch.manual_seed(0)
-    np.random.seed(0)
     data = torch.cat((Y, X), 1)
     data = data[torch.randperm(data.size()[0])]
     X = data[:, 1:]
     Y = data[:, 0]
     return X, Y
-
-def conf_mat(Y1, Y2):
-    num_of_samples = len(Y1)
-    mat = confusion_matrix(Y1, Y2, labels=[-1, 1])*100/num_of_samples
-    acc = np.trace(mat)
-    return mat, acc
-
-def calc_accuracy(Y, Ypred):
-    num = len(Y)
-    temp = Y - Ypred
-    acc = len(temp[temp == 0])*1./num
-    return acc
 
 # CCP classes
 

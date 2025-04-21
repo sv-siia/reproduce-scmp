@@ -13,7 +13,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 from torch.autograd.functional import jacobian
 from src.strategic_classification.utils.gain_and_cost_func import score, f, g, f_derivative
-
+from src.strategic_classification.utils.data_utils import split_data, shuffle
 torch.set_default_dtype(torch.float64)
 torch.manual_seed(0)
 np.random.seed(0)
@@ -25,36 +25,8 @@ EVAL_SLOPE = 1
 X_LOWER_BOUND = -30
 X_UPPER_BOUND = 30
 
-# =========================
-# Utils
-# =========================
 
-def split_data(X, Y, percentage):
-    num_val = int(len(X)*percentage)
-    return X[num_val:], Y[num_val:], X[:num_val], Y[:num_val]
-
-def shuffle(X, Y):
-    data = torch.cat((X, Y), 1)
-    data = data[torch.randperm(data.size()[0])]
-    X = data[:, :2]
-    Y = data[:, 2]
-    return X, Y
-
-def conf_mat(Y1, Y2):
-    num_of_samples = len(Y1)
-    mat = confusion_matrix(Y1, Y2, labels=[-1, 1])*100/num_of_samples
-    acc = np.trace(mat)
-    return mat, acc
-
-def calc_accuracy(Y, Ypred):
-    num = len(Y)
-    temp = Y - Ypred
-    acc = len(temp[temp == 0])*1./num
-    return acc
-
-# =========================
 # Dataset
-# =========================
 
 def gen_custom_normal_data(N, x_dim, pos_mean, pos_std, neg_mean, neg_std):
     torch.manual_seed(0)
@@ -96,9 +68,9 @@ def gen_custom_sin_data(N, shuff=True):
         Y = Y[:, 0]
     return X, Y
 
-# =========================
+
 # CCP classes
-# =========================
+
 
 class CCP:
     def __init__(self, x_dim, h_dim, funcs):
@@ -252,17 +224,17 @@ class DELTA_MANIFOLD():
     def optimize_X(self, X, w, b, F_DER, B_SPAN):
         return self.layer(X, w, b, F_DER, B_SPAN)[0]
 
-# =========================
+
 # Gain & Cost functions
-# =========================
+
 def c(x, r, x_dim):
     return cp.sum_squares(x-r)/70
 
 funcs = {"f": f, "g": g, "f_derivative": f_derivative, "c": c, "score": score}
 
-# =========================
+
 # CAE
-# =========================
+
 
 class CAE(nn.Module):
     def __init__(self, x_dim, h_dim, h2_dim, lamb=0):
@@ -381,9 +353,9 @@ class CAE(nn.Module):
                 print('====> Epoch: {} Average loss: {:.4f}'.format(
                      epoch, l.item()), " reconstruction loss: ", r_loss.item(), "contractive_loss: ", c_loss.item())
 
-# =========================
+
 # Model
-# =========================
+
 
 class MyStrategicModel(torch.nn.Module):
     def __init__(self, x_dim, h_dim, funcs, train_slope, eval_slope, strategic=False, manifold=False):
@@ -530,9 +502,9 @@ class MyStrategicModel(torch.nn.Module):
         print("training time: {} seconds".format(time.time()-total_time)) 
         return train_errors, val_errors, train_losses, val_losses
 
-# =========================
+
 # Data generation
-# =========================
+
 
 N = 2000
 x_dim = 2
@@ -555,9 +527,9 @@ B_SPANS = cae.get_spans(X)
 B_SPANSval = cae.get_spans(Xval)
 B_SPANStest = cae.get_spans(Xtest)
 
-# =========================
+
 # Train
-# =========================
+
 
 now = datetime.now()
 PATH = "./models/manifold/" + now.strftime("%d-%m-%Y_%H-%M-%S")
