@@ -14,8 +14,8 @@ class CustomDataset(Dataset):
             transform (callable, optional): Optional transform to apply to the data.
         """
         # Ensure data is in tensor format
-        self.X = torch.tensor(X, dtype=torch.float32)
-        self.Y = torch.tensor(Y, dtype=torch.float32)
+        self.X = torch.tensor(x, dtype=torch.float32)
+        self.Y = torch.tensor(y, dtype=torch.float32)
         self.transform = transform
 
     def __len__(self):
