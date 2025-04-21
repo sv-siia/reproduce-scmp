@@ -29,7 +29,7 @@ def evaluate_model(y_true, y_pred, y_scores=None):
 
     if y_scores is not None:
         try:
-            metrics['roc_aucC'] = roc_auc_score(y_true, y_scores)
+            metrics['roc_auc'] = roc_auc_score(y_true, y_scores)
         except ValueError:
             metrics['roc_auc'] = 'Undefined (check y_scores or y_true)'
 
