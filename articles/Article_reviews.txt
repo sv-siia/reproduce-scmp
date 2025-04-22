@@ -1,0 +1,32 @@
+
+ Key Contributions
+Core Argument: The title is a play on words—highlighting that while computational methods may be technically reproducible (via code, containers, etc.), the scientific findings often are not.
+
+Types of Reproducibility:
+
+Methods Reproducibility: Same code, same results.
+
+Results Reproducibility: Different implementation, similar results.
+
+Inferential Reproducibility: Same conclusions drawn from variations of the experiment.
+
+Empirical Focus: Investigates how model rankings (e.g., top performing deep learning models) can drastically shift with small experimental variations (random seeds, data order, etc.).
+
+ Methodology
+Benchmarked 10 popular deep learning models (e.g., ResNet, VGG) across six datasets (e.g., MNIST, CIFAR).
+
+Ran 10 randomized trials per model to examine ranking stability.
+
+Tested biased vs. unbiased experimental setups (e.g., shared vs. individually tuned hyperparameters).
+
+ Findings
+Ranking of models is highly unstable across seeds and datasets.
+
+Empirical conclusions are brittle and often not generalizable.
+
+Encourages the ML community to embrace proper empirical research, not just code reproducibility.
+
+ Implications
+Strongly recommends reporting confidence intervals, bootstrap rankings, and using multiple datasets and seeds.
+
+Argues for clearer distinctions between exploratory and empirical research
