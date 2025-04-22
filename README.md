@@ -4,8 +4,8 @@
 
 - Samidullo Abdullaev
 - Porimol Chandro
-- Shokoufeh Naseri
 - Anastasiia Sviridova
+- Shokoufeh Naseri
 
 ## Subject of Research
 
