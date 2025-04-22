@@ -51,6 +51,7 @@ uv sync
 - **Samidullo Abdullaev:** Manage data collection, preprocessing, and
 exploratory data analysis to ensure data quality and suitability.
 **Anastasiia Sviridova:** Develop and optimize machine learning models, focusing on both traditional and strategic classification approaches.
+  
 **Shokoufeh Naseri:** Conduct literature reviews and assist in analyzing results, contributing to the interpretation and documentation of findings.
 
 ## Conclusion
