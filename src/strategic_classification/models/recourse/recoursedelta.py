@@ -26,6 +26,8 @@ class DeltaRecourse(BaseDelta):
         self.layer = CvxpyLayer(problem, parameters=[self.r, self.w, self.b, self.f_der],
                                 variables=[self.x])
         
+    def score(self, x, w, b):
+        return x@w + b
         
     def optimize_X(self, X, w, b, F_DER):
         return self.layer(X, w, b, F_DER)[0]
@@ -35,4 +37,7 @@ class DeltaRecourse(BaseDelta):
 
     def g(self, x, w, b, slope):
         return 0.5*cp.norm(cp.hstack([1, (slope* self.score(x, w, b) - 1)]), 2)
-
+    
+    def g_dpp_form(self, x):
+        # not needed in this case
+        pass

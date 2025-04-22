@@ -4,6 +4,9 @@ import numpy as np
 from strategic_classification.config.constants import X_LOWER_BOUND, X_UPPER_BOUND
 
 
+XDIM = 11
+COST = 1/XDIM
+
 class CCPRecourse:
     """Class for solving the convex-concave problem using CVXPY."""
     def __init__(self, x_dim):
@@ -31,7 +34,10 @@ class CCPRecourse:
 
     def f_derivative(self, x, w, b, slope):
         return 0.5*cp.multiply(slope*((slope* self.score(x, w, b) + 1)/cp.sqrt((slope*self.score(x, w, b) + 1)**2 + 1)), w)
-        
+
+    def c(self, x, r, COST=COST):
+        return COST * cp.sum_squares(x - r)
+
     def ccp(self, r):
         """
         numpy to numpy
