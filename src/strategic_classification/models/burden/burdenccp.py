@@ -5,12 +5,9 @@ import numpy as np
 X_LOWER_BOUND = -10
 X_UPPER_BOUND = 10
 
-class CCP:
+class BurdenCCP:
     def __init__(self, x_dim, funcs):
-        self.f_derivative = funcs["f_derivative"]
-        self.g = funcs["g"]
-        self.c = funcs["c"]
-
+        self.cost = 1/x_dim
         self.x = cp.Variable(x_dim)
         self.xt = cp.Parameter(x_dim)
         self.r = cp.Parameter(x_dim)
@@ -53,3 +50,12 @@ class CCP:
         self.slope.value = slope
 
         return torch.stack([torch.from_numpy(self.ccp(x)) for x in X])
+
+    def g(x, w, b, slope):
+        return 0.5*cp.norm(cp.hstack([1, (slope*self.score(x, w, b) - 1)]), 2)
+
+    def c(x, r):
+        return self.cost*cp.sum_squares(x-r)
+
+    def f_derivative(x, w, b, slope):
+        return 0.5*cp.multiply(slope*((slope*self.score(x, w, b) + 1)/cp.sqrt((slope*self.score(x, w, b) + 1)**2 + 1)), w)
