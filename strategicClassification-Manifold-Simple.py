@@ -504,8 +504,6 @@ class MyStrategicModel(torch.nn.Module):
 
 
 # Data generation
-
-
 N = 2000
 x_dim = 2
 h_dim = 1

@@ -2,6 +2,7 @@ import typer
 from strategic_classification.models.rnn import train_rnn
 from strategic_classification.models.recourse import train_recourse
 from strategic_classification.models.utility import train_utility
+from strategic_classification.models.manifold import train_manifold
 app = typer.Typer(help="CLI for the reproduce-scmp project.")
 
 @app.command()
@@ -25,9 +26,11 @@ def train(model: str, dataset_path: str, epochs: int = 5, batch_size: int = 16, 
         # python src/strategic_classification/cli.py train recourse dataset --epochs 1 --batch-size 32 --model-checkpoint-path models/recourse
         # scmp train recourse dataset --epochs 2 --batch-size 16 --model-checkpoint-path models/recourse
         train_recourse(dataset_path, epochs, batch_size, model_checkpoint_path)
-    elif model == "maniforld":
+    elif model == "manifold":
         typer.echo("Training Maniforld model...")
-        # TODO: Add Maniforld model training logic here
+        # python src/strategic_classification/cli.py train manifold dataset --epochs 1 --batch-size 32 --model-checkpoint-path models/manifold
+        # scmp train manifold dataset --epochs 2 --batch-size 16 --model-checkpoint-path models/manifold
+        train_manifold(dataset_path, epochs, batch_size, model_checkpoint_path)
     elif model == "utility":
         typer.echo("Training Utility model...")
         # python src/strategic_classification/cli.py train utility dataset --epochs 1 --batch-size 32 --model-checkpoint-path models/utility
