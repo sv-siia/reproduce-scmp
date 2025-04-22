@@ -1,6 +1,7 @@
 import typer
 from strategic_classification.models.rnn import train_rnn
 from strategic_classification.models.recourse import train_recourse
+from strategic_classification.models.utility import train_utility
 app = typer.Typer(help="CLI for the reproduce-scmp project.")
 
 @app.command()
@@ -27,6 +28,11 @@ def train(model: str, dataset_path: str, epochs: int = 5, batch_size: int = 16, 
     elif model == "maniforld":
         typer.echo("Training Maniforld model...")
         # TODO: Add Maniforld model training logic here
+    elif model == "utility":
+        typer.echo("Training Utility model...")
+        # python src/strategic_classification/cli.py train utility dataset --epochs 1 --batch-size 32 --model-checkpoint-path models/utility
+        # scmp train utility dataset --epochs 2 --batch-size 16 --model-checkpoint-path models/utility
+        train_utility(dataset_path, epochs, batch_size, model_checkpoint_path)
     elif model == "rac":
         typer.echo("Training RobustnessAroundCost model...")
         # TODO: Add RobustnessAroundCost model training logic here
