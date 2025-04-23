@@ -2,12 +2,13 @@ import cvxpy as cp
 import torch
 import numpy as np
 from strategic_classification.config.constants import X_LOWER_BOUND, X_UPPER_BOUND
+from strategic_classification.models.baseccp import BaseCCP
 
 
-class RNNCCP:
+class RNNCCP(BaseCCP):
     """Class for solving the convex-concave problem using CVXPY."""
     def __init__(self, x_dim, h_dim):
-        
+        super().__init__(x_dim)
         self.x = cp.Variable(x_dim)
         self.xt = cp.Parameter(x_dim)
         self.r = cp.Parameter(x_dim)
