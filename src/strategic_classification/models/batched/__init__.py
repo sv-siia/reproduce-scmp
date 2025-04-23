@@ -1,1 +1,1 @@
-from .batched import train_burden
+from .batched import train_batched
