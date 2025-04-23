@@ -3,7 +3,6 @@ import cvxpy as cp
 import torch
 import numpy as np
 from cvxpylayers.torch import CvxpyLayer
-from sklearn.metrics import confusion_matrix
 import pandas as pd
 import time
 from datetime import datetime
@@ -17,7 +16,7 @@ X_LOWER_BOUND = -10
 X_UPPER_BOUND = 10
 
 class BURDEN():
-    def __init__(self, x_dim, funcs):
+    def __init__(self, x_dim):
         self.cost = 1/x_dim
         self.x = cp.Variable(x_dim)
         self.r = cp.Parameter(x_dim)
@@ -42,18 +41,18 @@ class BURDEN():
         Xmin = self.layer(Xpos, w, b)[0]
         return torch.mean(torch.sum((Xpos - Xmin) ** 2, dim=1))
 
-    def score(sell, x, w, b):
+    def score(self, x, w, b):
         return x@w + b
     
-    def c(sell, x, r):
+    def c(self, x, r):
         return self.cost*cp.sum_squares(x-r)
 
 
-class MyStrategicModel(torch.nn.Module):
-    def __init__(self, x_dim, funcs, train_slope, eval_slope, strategic=False, lamb=0):
+class MyBurdenModel(torch.nn.Module):
+    def __init__(self, x_dim, train_slope, eval_slope, strategic=False, lamb=0):
         torch.manual_seed(0)
         np.random.seed(0)
-        super(MyStrategicModel, self).__init__()
+        super(MyBurdenModel, self).__init__()
         self.x_dim = x_dim
         self.train_slope, self.eval_slope = train_slope, eval_slope
         self.w = torch.nn.parameter.Parameter(math.sqrt(1/x_dim)*(1-2*torch.rand(x_dim, dtype=torch.float64, requires_grad=True)))
@@ -230,28 +229,24 @@ def split_data(X, Y, percentage):
     return X[num_val:], Y[num_val:], X[:num_val], Y[:num_val]
 
 
-def burden_train(dataset_path: str, epochs: int = 5, batch_size: int = 16, model_checkpoint_path: str = "models/rnn"):
-    x_dim = XDIM
-    XDIM = 11
+def train_burden(epochs: int = 5, batch_size: int = 16, model_checkpoint_path: str = "models/burden"):
+    x_dim = 11
     TRAIN_SLOPE = 2
     EVAL_SLOPE = 5
-    X_LOWER_BOUND = -10
-    X_UPPER_BOUND = 10
 
     X, Y = load_credit_default_data()
     X, Y = X[:3000], Y[:3000]
 
-    assert(len(X[0]) == XDIM)
     X, Y, Xval, Yval = split_data(X, Y, 0.5)
     Xval, Yval, Xtest, Ytest = split_data(Xval, Yval, 0.5)
 
     # non-strategic classification
     print("---------- training non-strategically----------")
-    non_strategic_model = MyStrategicModel(x_dim, TRAIN_SLOPE, EVAL_SLOPE, strategic=False)
+    non_strategic_model = MyBurdenModel(x_dim, TRAIN_SLOPE, EVAL_SLOPE, strategic=False)
 
-    fit_res_non_strategic = non_strategic_model.fit(X, Y, Xval, Yval, Xtest, Ytest,
-                                    opt=torch.optim.Adam, opt_kwargs={"lr": 5*(1e-2)},
-                                    batch_size=batch_size, epochs=epochs, verbose=True, calc_train_errors=False)
+    non_strategic_model.fit(X, Y, Xval, Yval, Xtest, Ytest,
+                            opt=torch.optim.Adam, opt_kwargs={"lr": 5*(1e-2)},
+                            batch_size=batch_size, epochs=epochs, verbose=True, calc_train_errors=False)
 
     lambda_range = torch.logspace(start=-2, end=0.1, steps=30)
     print(lambda_range)
@@ -260,9 +255,9 @@ def burden_train(dataset_path: str, epochs: int = 5, batch_size: int = 16, model
         # strategic classification
         print("---------- training strategically----------")
         print("lambda: ", lamb.item())
-        strategic_model = MyStrategicModel(x_dim, TRAIN_SLOPE, EVAL_SLOPE, strategic=True, lamb=lamb)
+        strategic_model = MyBurdenModel(x_dim, TRAIN_SLOPE, EVAL_SLOPE, strategic=True, lamb=lamb)
 
-        fit_res_strategic = strategic_model.fit(X, Y, Xval, Yval, Xtest, Ytest,
-                                        opt=torch.optim.Adam, opt_kwargs={"lr": 5*(1e-2)},
-                                        batch_size=batch_size, epochs=epochs, verbose=True, calc_train_errors=False,
-                                        comment="burden_" + str(lamb.item()))
+        strategic_model.fit(X, Y, Xval, Yval, Xtest, Ytest,
+                            opt=torch.optim.Adam, opt_kwargs={"lr": 5*(1e-2)},
+                            batch_size=batch_size, epochs=epochs, verbose=True, calc_train_errors=False,
+                            comment="burden_" + str(lamb.item()))

@@ -1,1 +1,1 @@
-from .burden import BURDEN
+from .burden import train_burden
