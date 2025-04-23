@@ -2,7 +2,11 @@ import typer
 from strategic_classification.models.rnn import train_rnn
 from strategic_classification.models.recourse import train_recourse
 from strategic_classification.models.utility import train_utility
+from strategic_classification.models.batched import train_burden
 from strategic_classification.models.manifold import train_manifold
+from strategic_classification.models.batched import train_burden
+from strategic_classification.models.manifold import train_manifold
+
 app = typer.Typer(help="CLI for the reproduce-scmp project.")
 
 @app.command()
@@ -39,6 +43,10 @@ def train(model: str, dataset_path: str, epochs: int = 5, batch_size: int = 16, 
     elif model == "rac":
         typer.echo("Training RobustnessAroundCost model...")
         # TODO: Add RobustnessAroundCost model training logic here
+    elif model == "batched":
+        typer.echo("Training Batched model...")
+        # scmp train batched dataset --epochs 2 --batch-size 16 --model-checkpoint-path models/batched
+        train_burden(epochs, batch_size, model_checkpoint_path)
     else:
         typer.echo(f"Unknown model: {model}")
 

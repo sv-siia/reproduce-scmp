@@ -1,7 +1,31 @@
 import cvxpy as cp
+import numpy as np
+from cvxpylayers.torch import CvxpyLayer
 from strategic_classification.models.basedelta import BaseDelta
 
+X_LOWER_BOUND = -10
+X_UPPER_BOUND = 10
+
 class DeltaRNN(BaseDelta):
+    """Class for solving the convex-concave problem using CVXPY for RNN."""
+    def __init__(self, x_dim):
+        self.x_dim = x_dim
+        self.x = cp.Variable(x_dim)
+        self.r = cp.Parameter(x_dim, value=np.random.randn(x_dim))
+        self.f_der = cp.Parameter(x_dim, value=np.random.randn(x_dim))
+
+        self.h__w_hh_hy = cp.Parameter(1, value=np.random.randn(1))
+        self.w_xh_hy = cp.Parameter(x_dim, value=np.random.randn(x_dim))
+        self.w_b_hy = cp.Parameter(1, value=np.random.randn(1))
+
+        target = self.x @ self.f_der - self.g_dpp_form(self.x) - self.c(self.x, self.r)
+        constraints = [self.x >= X_LOWER_BOUND, self.x <= X_UPPER_BOUND]
+        objective = cp.Maximize(target)
+        problem = cp.Problem(objective, constraints)
+
+        self.layer = CvxpyLayer(problem, parameters=[self.r, self.h__w_hh_hy, self.w_xh_hy, self.w_b_hy, self.f_der],
+                                variables=[self.x])
+        
     def g_dpp_form(self, x):
         """Override g in DPP form for RNN."""
         return 0.5 * cp.norm(cp.hstack([1, (self.h__w_hh_hy + x @ self.w_xh_hy.T + self.w_b_hy - 1)]), 2)
