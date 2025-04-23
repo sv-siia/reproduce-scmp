@@ -4,6 +4,7 @@ from strategic_classification.models.recourse import train_recourse
 from strategic_classification.models.utility import train_utility
 from strategic_classification.models.batched import train_batched
 from strategic_classification.models.manifold import train_manifold
+from strategic_classification.models.burden import train_burden
 
 app = typer.Typer(help="CLI for the reproduce-scmp project.")
 
@@ -45,6 +46,11 @@ def train(model: str, dataset_path: str, epochs: int = 5, batch_size: int = 16, 
         typer.echo("Training Batched model...")
         # scmp train batched dataset --epochs 2 --batch-size 16 --model-checkpoint-path models/batched
         train_batched(epochs, batch_size, model_checkpoint_path)
+    elif model == "burden":
+        typer.echo("Training Batched model...")
+        # python src/strategic_classification/cli.py train burden dataset --epochs 1 --batch-size 32 --model-checkpoint-path models/burden
+        # scmp train burden dataset --epochs 2 --batch-size 16 --model-checkpoint-path models/burden
+        train_burden(epochs, batch_size, model_checkpoint_path)
     else:
         typer.echo(f"Unknown model: {model}")
 
