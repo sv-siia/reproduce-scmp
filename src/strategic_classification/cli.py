@@ -4,6 +4,7 @@ from strategic_classification.models.recourse import train_recourse
 from strategic_classification.models.utility import train_utility
 from strategic_classification.models.batched import train_burden
 from strategic_classification.models.manifold import train_manifold
+from strategic_classification.models.batched import train_burden
 
 app = typer.Typer(help="CLI for the reproduce-scmp project.")
 
