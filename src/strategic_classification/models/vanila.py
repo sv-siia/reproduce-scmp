@@ -10,8 +10,9 @@ from torch.utils.data import TensorDataset, DataLoader
 from sklearn.preprocessing import StandardScaler, RobustScaler
 import math
 import os
-from src.strategic_classification.utils.gain_and_cost_func import score, f, g, f_derivative
-from src.strategic_classification.utils.data_utils import split_data
+from strategic_classification.utils.gain_and_cost_func import score, f, g, f_derivative
+from strategic_classification.utils.data_utils import split_data
+
 torch.set_default_dtype(torch.float64)
 torch.manual_seed(0)
 np.random.seed(0)
@@ -23,40 +24,42 @@ X_UPPER_BOUND = 10
 SEED = 0
 
 # # Utils
-"""
-    Randomly shuffles the dataset by concatenating features and labels,
-    shuffling the combined tensor, and then separating them again.
+...
 
-    Args:
-        X (torch.Tensor): Feature matrix of shape (n_samples, n_features).
-        Y (torch.Tensor): Label vector of shape (n_samples,).
+def load_financial_distress_data():
+    torch.manual_seed(0)
+    np.random.seed(0)
+    data = pd.read_csv("dataset/financial_distress.csv")
 
-    Returns:
-        Tuple[torch.Tensor, torch.Tensor]: Shuffled (X, Y) tensors.
-    """
-def shuffle(X, Y):
-    data = torch.cat((Y, X), 1)
-    data = data[torch.randperm(data.size()[0])]
-    X = data[:, 1:]
-    Y = data[:, 0]
-    return X, Y
+    data = data[data.columns.drop(list(data.filter(regex='x80')))]  # Remove categorical feature columns
+    x_dim = len(data.columns) - 3
+    data.drop(['Time'], axis=1, inplace=True)
 
-# # Dataset
-"""
-    Load and preprocess the spam dataset for binary classification.
+    data_grouped = data.groupby(['Company']).last()
 
-    This function reads a spam dataset from an ARFF file, selects the most discriminative features,
-    encodes the target labels, normalizes the feature matrix, and returns it as PyTorch tensors.
+    scaler = StandardScaler()
+    # Fix: convert scaled data to float to avoid FutureWarning
+    data_grouped.loc[:, data_grouped.columns != "Financial Distress"] = scaler.fit_transform(
+        data_grouped.drop("Financial Distress", axis=1)
+    ).astype(np.float64)
 
-    Returns:
-        Tuple[torch.Tensor, torch.Tensor]: A tuple containing:
-            - X (torch.Tensor): Normalized feature matrix.
-            - Y (torch.Tensor): Target labels with values {-1, 1}, where -1 indicates 'spam' and 1 indicates 'notspam'.
-    """
+    # Shuffle dataframe rows
+    data_grouped = data_grouped.sample(frac=1, random_state=SEED).reset_index(drop=True)
+
+    Y, X = data_grouped.iloc[:, 0].values, data_grouped.iloc[:, 1:].values
+    for y in range(0, len(Y)):  # Convert target from continuous to binary
+        Y[y] = -1 if Y[y] < -0.5 else 1
+
+    x_dim = len(X[0])
+    X -= np.mean(X, axis=0)
+    X /= np.std(X, axis=0)
+    X /= math.sqrt(x_dim)
+    return torch.from_numpy(X), torch.from_numpy(Y)
+
 def load_spam_data():
     torch.manual_seed(0)
     np.random.seed(0)
-    path = r"./dataset/IS_journal_tip_spam.arff"
+    path = r"dataset/IS_journal_tip_spam.arff"
     data, meta = arff.loadarff(path)
     df = pd.DataFrame(data)
     most_disc = ['qTips_plc', 'rating_plc', 'qEmail_tip', 'qContacts_tip', 'qURL_tip', 'qPhone_tip', 'qNumeriChar_tip', 'sentistrength_tip', 'combined_tip', 'qWords_tip', 'followers_followees_gph', 'qunigram_avg_tip', 'qTips_usr', 'indeg_gph', 'qCapitalChar_tip', 'class1']
@@ -75,35 +78,36 @@ def load_spam_data():
 def load_card_fraud_data():
     torch.manual_seed(0)
     np.random.seed(0)
-    df = pd.read_csv('./card_fraud_dataset/creditcard.csv')
+    df = pd.read_csv('./dataset/credit/credit_raw.csv')
+
+    if 'Amount' not in df.columns:
+        raise ValueError("The dataset does not contain the 'Amount' column. Please verify the file.")
 
     rob_scaler = RobustScaler()
-
-    df['scaled_amount'] = rob_scaler.fit_transform(df['Amount'].values.reshape(-1,1))
-    df.drop(['Time','Amount'], axis=1, inplace=True)
-    scaled_amount = df['scaled_amount']
-    df.drop(['scaled_amount'], axis=1, inplace=True)
-    df.insert(0, 'scaled_amount', scaled_amount)
+    df['scaled_amount'] = rob_scaler.fit_transform(df['Amount'].values.reshape(-1, 1))
+    df.drop(['Time', 'Amount'], axis=1, inplace=True)
+    df.insert(0, 'scaled_amount', df.pop('scaled_amount'))
 
     df["Class"].replace({1: -1, 0: 1}, inplace=True)
     df = df.sample(frac=1, random_state=SEED).reset_index(drop=True)
 
-    # amount of fraud classes 492 rows.
     fraud_df = df.loc[df['Class'] == -1]
     non_fraud_df = df.loc[df['Class'] == 1][:492]
-
-    normal_distributed_df = pd.concat([fraud_df, non_fraud_df])
-
-    # Shuffle dataframe rows
-    df = normal_distributed_df.sample(frac=1, random_state=SEED).reset_index(drop=True)
+    df = pd.concat([fraud_df, non_fraud_df])
+    df = df.sample(frac=1, random_state=SEED).reset_index(drop=True)
 
     Y = df['Class'].values
-    X = df.drop('Class', axis = 1).values
+    X = df.drop('Class', axis=1).values
     x_dim = len(X[0])
     X -= np.mean(X, axis=0)
     X /= np.std(X, axis=0)
     X /= math.sqrt(x_dim)
     return torch.from_numpy(X), torch.from_numpy(Y)
+
+# Remaining code unchanged
+...
+
+
 
 def load_credit_default_data():
     torch.manual_seed(0)
@@ -135,7 +139,7 @@ def load_credit_default_data():
 def load_financial_distress_data():
     torch.manual_seed(0)
     np.random.seed(0)
-    data = pd.read_csv("./financial_distress_data/Financial Distress.csv")
+    data = pd.read_csv("dataset/financial_distress.csv")
 
     data = data[data.columns.drop(list(data.filter(regex='x80')))] # Since it is a categorical feature with 37 features.
     x_dim = len(data.columns) - 3
@@ -408,19 +412,19 @@ training_datas.append({"X": X,
                         "batch_size": 24,
                         "name": "distress"})
 
-# fraud dataset
-X, Y = load_card_fraud_data()
-X, Y, Xval, Yval = split_data(X, Y, 0.4)
-Xval, Yval, Xtest, Ytest = split_data(Xval, Yval, 0.5)
-training_datas.append({"X": X,
-                        "Y": Y,
-                        "Xval": Xval,
-                        "Yval": Yval,
-                        "Xtest": Xtest,
-                        "Ytest": Ytest,
-                        "epochs": 7,
-                        "batch_size": 24, 
-                        "name": "fraud"})
+# # fraud dataset
+# X, Y = load_card_fraud_data()
+# X, Y, Xval, Yval = split_data(X, Y, 0.4)
+# Xval, Yval, Xtest, Ytest = split_data(Xval, Yval, 0.5)
+# training_datas.append({"X": X,
+#                         "Y": Y,
+#                         "Xval": Xval,
+#                         "Yval": Yval,
+#                         "Xtest": Xtest,
+#                         "Ytest": Ytest,
+#                         "epochs": 7,
+#                         "batch_size": 24, 
+#                         "name": "fraud"})
 
 # credit data
 X, Y = load_credit_default_data()
@@ -437,19 +441,19 @@ training_datas.append({"X": X,
                         "batch_size": 64, 
                         "name": "credit"})
 
-# spam dataset
-X, Y = load_spam_data()
-X, Y, Xval, Yval = split_data(X, Y, 0.4)
-Xval, Yval, Xtest, Ytest = split_data(Xval, Yval, 0.5)
-training_datas.append({"X": X,
-                        "Y": Y,
-                        "Xval": Xval,
-                        "Yval": Yval,
-                        "Xtest": Xtest,
-                        "Ytest": Ytest,
-                        "epochs": 7,
-                        "batch_size": 128, 
-                        "name": "spam"})
+# # spam dataset
+# X, Y = load_spam_data()
+# X, Y, Xval, Yval = split_data(X, Y, 0.4)
+# Xval, Yval, Xtest, Ytest = split_data(Xval, Yval, 0.5)
+# training_datas.append({"X": X,
+#                         "Y": Y,
+#                         "Xval": Xval,
+#                         "Yval": Yval,
+#                         "Xtest": Xtest,
+#                         "Ytest": Ytest,
+#                         "epochs": 7,
+#                         "batch_size": 128, 
+#                         "name": "spam"})
 
 # # Train
 
