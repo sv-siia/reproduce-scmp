@@ -7,6 +7,13 @@
 - Anastasiia Sviridova
 - Shokoufeh Naseri
 
+## Team Member Responsibilities
+
+- **Porimol Chandro:** Lead the (reproducible) implementation design plans.
+- **Samidullo Abdullaev:** Data collection, preprocessing, and exploratory data analysis.
+- **Anastasiia Sviridova:** Reproduce and optimize machine learning models.
+- **Shokoufeh Naseri:** Conduct literature reviews and assist in analyzing results, contributing to the interpretation and documentation of findings.
+
 ## Subject of Research
 
 Our project focuses on reproducing and evaluating the methodologies presented in the paper "Strategic Classification Made Practical" by Sagi Levanon and Nir Rosenfeld. This study addresses the challenges posed by strategic behavior in classification tasks, where individuals may alter their features to receive favorable outcomes. The authors propose a learning framework that directly minimizes the "strategic" empirical risk by differentiating through the strategic responses of users.
@@ -21,14 +28,14 @@ Our project focuses on reproducing and evaluating the methodologies presented in
 
 ## Tools and Technologies
 
-- **Programming Languages:** Python
-- **Libraries and Frameworks:** TensorFlow or PyTorch for model
-implementation, NumPy and Pandas for data manipulation, Matplotlib or Seaborn for visualization.
-- **Version Control:** Git and GitHub for collaborative development and version tracking.
+- **Programming Languages:** Python 3.12.*
+- **Package Dependency Manager:** [UV](https://docs.astral.sh/uv/)
+- **Libraries and Frameworks:** PyTorch, Numpy and Pandas for data manipulation, Matplotlib.
+- **Version Control:** Git and [GitHub](https://github.com/sv-siia/reproduce-scmp) for collaborative development and for source code version control.
 
 ## How to install and run?
 
-At first install the `uv` python package manager, see more [here](https://docs.astral.sh/uv/getting-started/installation/#__tabbed_1_2).
+At first install the `uv` python package manager, see more [here](https://docs.astral.sh/uv/getting-started/installation/).
 
 Clone the code repository as follows
 
@@ -45,13 +52,30 @@ Install Python dependencies using `uv` package manager
 uv sync
 ```
 
-## Team Member Responsibilities
+## Developer Installation (Editable mode)
 
-- **Porimol Chandro:** Lead the implementation of the strategic classification framework and oversee the integration of various components.
-- **Samidullo Abdullaev:** Manage data collection, preprocessing, and
-exploratory data analysis to ensure data quality and suitability.
-- **Anastasiia Sviridova:** Develop and optimize machine learning models, focusing on both traditional and strategic classification approaches.
-- **Shokoufeh Naseri:** Conduct literature reviews and assist in analyzing results, contributing to the interpretation and documentation of findings.
+To install the project as a developer package (editable mode), please follow these steps:
+
+1. Ensure you have installed the `uv` Python package manager. For installation instructions, refer to the [official documentation](https://docs.astral.sh/uv/getting-started/installation/).
+
+2. Install the project in editable mode by running the following command in the project directory:
+
+   ```bash
+   uv pip install --editable .
+   ```
+
+   This command will:
+   - Install the project as a package in editable mode.
+   - Allow you to make changes to the code and immediately use them without reinstalling.
+   - Install all required dependencies specified in the `pyproject.toml` file.
+
+3. Verify the installation by running the CLI command:
+
+   ```bash
+   scmp --help
+   ```
+
+   This should display the help message for the `scmp` CLI tool, confirming that the package is installed and ready for development.
 
 ## Conclusion
 
