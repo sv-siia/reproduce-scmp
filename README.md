@@ -33,6 +33,83 @@ Our project focuses on reproducing and evaluating the methodologies presented in
 - **Libraries and Frameworks:** PyTorch, Numpy and Pandas for data manipulation, Matplotlib.
 - **Version Control:** Git and [GitHub](https://github.com/sv-siia/reproduce-scmp) for collaborative development and for source code version control.
 
+## Project Structure
+
+```bash
+.
+├── articles
+│   ├── Article_reviews.txt
+│   └── bouthillier19a.pdf
+├── dataset
+│   ├── credit
+│   │   ├── ...
+│   ├── financial_distress.csv
+│   ├── german
+│   │   └── ...
+│   ├── german_processed.csv
+│   ├── givemecredit
+│   │   ├── ...
+│   └── IS_journal_tip_spam.arff
+├── pyproject.toml
+├── README.md
+├── src
+│   ├── __init__.py
+│   └── strategic_classification
+│       ├── __init__.py
+│       ├── cli.py
+│       ├── config
+│       │   ├── __init__.py
+│       │   └── constants.py
+│       ├── models
+│       │   ├── __init__.py
+│       │   ├── baseccp.py
+│       │   ├── basedelta.py
+│       │   ├── batched
+│       │   │   ├── __init__.py
+│       │   │   ├── batched.py
+│       │   │   ├── batchedccp.py
+│       │   │   └── batcheddelta.py
+│       │   ├── burden
+│       │   │   ├── __init__.py
+│       │   │   ├── burden.py
+│       │   │   ├── burdenccp.py
+│       │   │   └── burdendelta.py
+│       │   ├── manifold
+│       │   │   ├── __init__.py
+│       │   │   ├── manifold.py
+│       │   │   ├── manifoldcpp.py
+│       │   │   └── manifolddelta.py
+│       │   ├── recourse
+│       │   │   ├── __init__.py
+│       │   │   ├── recourse.py
+│       │   │   ├── recoursecpp.py
+│       │   │   └── recoursedelta.py
+│       │   ├── rnn
+│       │   │   ├── __init__.py
+│       │   │   ├── rnn.py
+│       │   │   ├── rnnccp.py
+│       │   │   └── rnndelta.py
+│       │   ├── utility
+│       │   │   ├── __init__.py
+│       │   │   ├── utilityccp.py
+│       │   │   ├── utilitydelta.py
+│       │   │   └── utiliy.py
+│       │   └── vanila
+│       │       ├── __init__.py
+│       │       ├── vanila.py
+│       │       ├── vanilaccp.py
+│       │       └── vaniladelta.py
+│       └── utils
+│           ├── __init__.py
+│           ├── data_utils.py
+│           ├── dataloader.py
+│           ├── eda.py
+│           ├── gain_and_cost_func.py
+│           └── metrics.py
+├── tests
+└── uv.lock
+```
+
 ## How to install and run?
 
 At first install the `uv` python package manager, see more [here](https://docs.astral.sh/uv/getting-started/installation/).
