@@ -227,3 +227,11 @@ model saved!
 ## Conclusion
 
 By reimplementing the methodologies from `Strategic Classification Made Practical,` our project aims to bridge the gap between theoretical research and practical application in the field of strategic classification. This work will provide insights into the challenges and solutions associated with strategic behavior in machine learning models, contributing to the development of more robust and fair predictive systems.
+
+## Disclaimer
+
+This project is an academic exercise part of `Reproducible Research 2400-DS2RR` course work with the focused on reproducing the methodologies.
+
+In conducting this project, we have significantly utilized and adapted code and resources made available by the original authors in their official GitHub repository [Strategic classification made practical](https://github.com/SagiLevanon1/scmp).
+
+We gratefully acknowledge this source, as the original implementation served as a crucial reference and foundation for our work. All credit for the original methodologies and codebase belongs to the authors of the paper and the repository maintainers.
