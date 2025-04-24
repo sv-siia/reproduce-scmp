@@ -75,7 +75,77 @@ To install the project as a developer package (editable mode), please follow the
    scmp --help
    ```
 
-   This should display the help message for the `scmp` CLI tool, confirming that the package is installed and ready for development.
+   This should displaying the help message for the `scmp` CLI tool, confirming that the package is installed and ready for development.
+
+   ```bash
+   Usage: scmp [OPTIONS] COMMAND [ARGS]... 
+                                   
+   CLI for the reproduce-scmp project.                                                                                                                                                                                                                                                             
+   ╭─ Options ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+   │ --install-completion          Install completion for the current shell.                                                   │
+   │ --show-completion             Show completion for the current shell, to copy it or customize the installation.            │
+   │ --help                        Show this message and exit.                                                                 │
+   ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+   ╭─ Commands ────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+   │ evaluate   Evaluate the trained models.                                                                                   │
+   │ train      Train specific models.                                                                                         │
+   ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+   ```
+
+   ```bash
+   scmp train --help
+   ```
+
+   The command `scmp train --help` shows the help message for the train subcommand of the scmp CLI tool. It provides an overview of the available training commands for different models (e.g., RNN, Recourse, etc.) and brief descriptions.
+
+   ```bash
+   Usage: scmp train [OPTIONS] COMMAND [ARGS]...
+   
+   Train specific models.
+   
+   ╭─ Options ──────────────────────────────────────╮
+   │ --help          Show this message and exit.    │
+   ╰────────────────────────────────────────────────╯
+   ╭─ Commands ─────────────────────────────────────╮
+   │ rnn        Train the RNN model.                │
+   │ recourse   Train the Recourse model.           │
+   │ utility    Train the Utility model.            │
+   │ batched    Train the Batched model.            │
+   │ burden     Train the Burden model.             │
+   │ vanila     Train the Vanila model.             │
+   │ manifold   Train the Manifold model.           │
+   ╰────────────────────────────────────────────────╯
+   ```
+
+## Example
+
+### RNN model training
+
+if everything went well as described above, run the following command to train the RNN model
+
+```bash
+scmp train rnn dataset --epochs 2 --batch-size 16 --model-checkpoint-path models/rnn
+```
+
+**In console you will see something similar as follows**
+
+```bash
+ solves will not be faster than the first one. For more information, see the documentation on Disciplined Parametrized Programming, at https://www.cvxpy.org/tutorial/dpp/index.html
+  warnings.warn(DPP_ERROR_MSG)
+model saved!
+training time: 11.583229064941406 seconds
+---------- training non-strategically----------
+.venv/lib/python3.12/site-packages/cvxpy/expressions/expression.py:674: UserWarning: 
+This use of ``*`` has resulted in matrix multiplication.
+Using ``*`` for matrix multiplication has been deprecated since CVXPY 1.1.
+    Use ``*`` for matrix-scalar and vector-scalar multiplication.
+    Use ``@`` for matrix-matrix and matrix-vector multiplication.
+    Use ``multiply`` for elementwise multiplication.
+This code path has been hit 15 times so far.
+
+  warnings.warn(msg, UserWarning)
+model saved!
+```
 
 ## Conclusion
 
