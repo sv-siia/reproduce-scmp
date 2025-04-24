@@ -12,7 +12,7 @@
 - **Porimol Chandro:** Lead the (reproducible) implementation design plans.
 - **Samidullo Abdullaev:** Data collection, preprocessing, and exploratory data analysis.
 - **Anastasiia Sviridova:** Reproduce and optimize machine learning models.
-- **Shokoufeh Naseri:** Contributed to code refactoring, dataset preparation, Git workflow management, and implementation debugging to ensure successful reproduction of the original results.
+- **Shokoufeh Naseri:** Contributed to code refactoring, Conducted literature reviews, Git workflow management, and implementation debugging to ensure successful reproduction of the original results.
 
 ## Subject of Research
 
