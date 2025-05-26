@@ -194,6 +194,16 @@ To install the project as a developer package (editable mode), please follow the
    ╰────────────────────────────────────────────────╯
    ```
 
+### Unit Tests
+
+To ensure the functionality of the project, we have implemented unit tests. These tests cover various components of the codebase.
+
+To run the unit tests, you can use the following command:
+
+```bash
+pytest tests
+```
+
 ## Example
 
 ### RNN model training
