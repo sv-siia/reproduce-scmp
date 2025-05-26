@@ -1,16 +1,20 @@
 import pytest
 import torch
-from .rnn import MyRNN
-from . import rnn
+from strategic_classification.models.rnn.rnn import MyRNN
+import strategic_classification.models.rnn.rnn as rnn
 
 
 class DummyCCP:
-    def _init_(self, x_dim, h_dim): pass
+    def __init__(self, x_dim, h_dim):
+        pass
+
     def optimize_X(self, x, H, W_hy, W_hh, W_xh, b, slope):
         return x
 
 class DummyDelta:
-    def _init_(self, x_dim): pass
+    def __init__(self, x_dim):
+        pass
+    
     def optimize_X(self, x, H, W_hy, W_hh, W_xh, b, F_DER):
         return x
 
@@ -47,7 +51,7 @@ def test_forward_output_shape(dummy_input, dummy_dims):
     model = MyRNN(x_dim, h_dim, 1.0, 1.0)
     X, _ = dummy_input
     out = model.forward(X)
-    assert out.shape == (batch, h_dim)
+    assert out.shape == (batch,)
 
 def test_loss_scalar(dummy_input, dummy_dims):
     x_dim, h_dim, _, _ = dummy_dims
