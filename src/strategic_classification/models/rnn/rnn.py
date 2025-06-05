@@ -235,18 +235,18 @@ def train_rnn(dataset_path: str, epochs: int = 5, batch_size: int = 16, model_ch
                                     batch_size=batch_size, epochs=epochs, verbose=False,
                                     comment="strategic")
 
-    non_strategic_model = MyRNN(x_dim, h_dim, TRAIN_SLOPE, EVAL_SLOPE, strategic=False, extra=False)
-    non_strategic_model.load_model(path + "/non_strategic/model.pt")
+        # non_strategic_model = MyRNN(x_dim, h_dim, TRAIN_SLOPE, EVAL_SLOPE, strategic=False, extra=False)
+        non_strategic_model.load_model(path + "/non_strategic/model.pt")
 
-    strategic_model = MyRNN(x_dim, h_dim, TRAIN_SLOPE, EVAL_SLOPE, strategic=True, extra=False)
-    strategic_model.load_model(path + "/strategic/model.pt")
+        # strategic_model = MyRNN(x_dim, h_dim, TRAIN_SLOPE, EVAL_SLOPE, strategic=True, extra=False)
+        strategic_model.load_model(path + "/strategic/model.pt")
 
-    accuracies = np.zeros(3)
-    accuracies[0] = non_strategic_model.evaluate(Xtest, Ytest)
+        accuracies = np.zeros(3)
+        accuracies[0] = non_strategic_model.evaluate(Xtest, Ytest)
 
-    accuracies[1] = strategic_model.evaluate(Xtest, Ytest)
+        accuracies[1] = strategic_model.evaluate(Xtest, Ytest)
 
-    Xtest_opt = non_strategic_model.optimize_X(Xtest)
-    accuracies[2] = non_strategic_model.evaluate(Xtest_opt, Ytest)
+        Xtest_opt = non_strategic_model.optimize_X(Xtest)
+        accuracies[2] = non_strategic_model.evaluate(Xtest_opt, Ytest)
 
-    pd.DataFrame(accuracies).to_csv(path + '/results.csv')
+        pd.DataFrame(accuracies).to_csv(path + '/results.csv')
