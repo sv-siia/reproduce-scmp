@@ -199,7 +199,7 @@ def split_data(X, Y, percentage):
     return X[num_val:], Y[num_val:], X[:num_val], Y[:num_val]
 
 
-def train_batched(epochs: int = 5, batch_size: int = 16, model_checkpoint_path: str = "models/burden"):
+def train_batched(epochs: int = 5, batch_size: int = 16, model_checkpoint_path: str = "models/batched"):
     x_dim = 5
     scale = 1
     TRAIN_SLOPE = 1

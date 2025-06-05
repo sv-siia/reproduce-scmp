@@ -341,7 +341,7 @@ class MyManifold(torch.nn.Module):
         return train_errors, val_errors, train_losses, val_losses
 
 
-def train_manifold(dataset = None, epochs: int = 6, batch_size: int = 64, model_checkpoint_path: str = "./models/manifold"):
+def train_manifold(dataset = None, epochs: int = 6, batch_size: int = 64, model_checkpoint_path: str = "models/manifold"):
     """
     Train manifold models with the given parameters.
     """

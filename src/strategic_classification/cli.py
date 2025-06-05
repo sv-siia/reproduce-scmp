@@ -50,8 +50,8 @@ def train_batched_model(epochs: int = 5, batch_size: int = 16, model_checkpoint_
     """
     Train the Batched model.
     """
-    # python src/strategic_classification/cli.py train batched dataset --epochs 1 --batch-size 32 --model-checkpoint-path models/batched
-    # scmp train batched dataset --epochs 2 --batch-size 16 --model-checkpoint-path models/batched
+    # python src/strategic_classification/cli.py train batched --epochs 1 --batch-size 32 --model-checkpoint-path models/batched
+    # scmp train batched --epochs 2 --batch-size 16 --model-checkpoint-path models/batched
     typer.echo("Training Batched model...")
     train_batched(epochs, batch_size, model_checkpoint_path)
 
@@ -61,8 +61,8 @@ def train_burden_model(epochs: int = 5, batch_size: int = 16, model_checkpoint_p
     """
     Train the Burden model.
     """
-    # python src/strategic_classification/cli.py train burden dataset --epochs 1 --batch-size 32 --model-checkpoint-path models/burden
-    # scmp train burden dataset --epochs 2 --batch-size 16 --model-checkpoint-path models/burden
+    # python src/strategic_classification/cli.py train burden --epochs 1 --batch-size 32 --model-checkpoint-path models/burden
+    # scmp train burden --epochs 2 --batch-size 16 --model-checkpoint-path models/burden
     typer.echo("Training Burden model...")
     train_burden(epochs, batch_size, model_checkpoint_path)
 
@@ -72,8 +72,8 @@ def train_vanila_model(epochs: int = 5, batch_size: int = 16, model_checkpoint_p
     """
     Train the Vanila model.
     """
-    # python src/strategic_classification/cli.py train vanila dataset --epochs 1 --batch-size 32 --model-checkpoint-path models/vanila
-    # scmp train vanila dataset --epochs 2 --batch-size 16 --model-checkpoint-path models/vanila
+    # python src/strategic_classification/cli.py train vanila --epochs 1 --batch-size 32 --model-checkpoint-path models/vanila
+    # scmp train vanila --epochs 2 --batch-size 16 --model-checkpoint-path models/vanila
     typer.echo("Training Vanila model...")
     train_vanila(epochs, batch_size, model_checkpoint_path)
 
@@ -83,8 +83,8 @@ def train_manifold_model(epochs: int = 5, batch_size: int = 16, model_checkpoint
     """
     Train the Manifold model.
     """
-    # python src/strategic_classification/cli.py train manifold dataset --epochs 1 --batch-size 32 --model-checkpoint-path models/manifold
-    # scmp train manifold dataset --epochs 2 --batch-size 16 --model-checkpoint-path models/manifold
+    # python src/strategic_classification/cli.py train manifold --epochs 1 --batch-size 32 --model-checkpoint-path models/manifold
+    # scmp train manifold --epochs 2 --batch-size 16 --model-checkpoint-path models/manifold
     typer.echo("Training Manifold model...")
     train_manifold(epochs, batch_size, model_checkpoint_path)
 
